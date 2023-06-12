@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Masjid Audit Form</title>
+  <script lang="javascript" src="https://cdn.jsdelivr.net/gh/sheetjs/sheetjs/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+  <h1>MASJID-E-KHASIMIAH AUDIT TOOL</h1>
+  <style>
+    body {
+      background-image: url("images/bg2.jpg");
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: large;
+      margin: 20px;
+    }
+
+    h1 {
+      font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+      text-align: center; color: brown;
+      font-size: 45px;
+    }
+
+    form {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    table {
+      width: 120%;
+      border-collapse: collapse;
+      margin: 0 auto;
+      font-size:large;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: center;
+      border: 1px solid brown;
+    }
+
+    th {
+      font-family: cursive;
+    }
+
+    input[type="number"] {
+      width: 80px;
+    }
+
+    #totalSum {
+      font-weight: bold;
+    }
+    
+    Button {
+      display: block;
+      width: 200px;
+      margin: auto;
+      background-color: lightcoral;
+      color: black;
+      padding: 10px;
+      text-align: center;
+      border-radius: auto;
+      cursor: pointer;
+    }
+  </style>
+  <script>
+    function calculateSum() {
+      var amountFields = document.getElementsByName("amount");
+      var sum = 0;
+
+      for (var i = 0; i < amountFields.length; i++) {
+        var amount = parseInt(amountFields[i].value);
+
+        if (!isNaN(amount)) {
+          sum += amount;
+        }
+      }
+
+      document.getElementById("totalSum").value = sum;
+    }
+    function exportData() {
+     var formData = [];
+     var headers = [
+       ['MASJID-E-KHASIMIAH', '', '', '', ''],
+       ['23, Church Road, Murugesh Palya, Bangalore-560017', '', '', '', ''],
+       ['CHANDA COLLECTION RECEIPT-WISE TRACKING', '', '', '', ''],
+       ['Book Number', 'Receipt No.', 'Date', 'Amount', 'Comments']
+      ];
+     var data = headers;
+
+     for (var i = 1; i <= 100; i++) {
+       var bookNumber = 1;
+       var receiptNo = i;
+       var date = new Date().toISOString().split('T')[0];
+       var amount = parseInt(document.getElementById(`amount${i}`).value);
+       var comments = document.getElementById(`comments${i}`).value;
+
+       var rowData = [bookNumber, receiptNo, date, amount, comments];
+       data.push(rowData);
+      }
+
+     var sumRow = ['', '','Total Sum', document.getElementById("totalSum").value];
+     data.push(sumRow);
+
+     var worksheet = XLSX.utils.aoa_to_sheet(data);
+
+     // Merge cells for header rows
+     var mergeCells = [
+       { s: { r: 0, c: 0 }, e: { r: 0, c: 4 } },
+       { s: { r: 1, c: 0 }, e: { r: 1, c: 4 } },
+       { s: { r: 2, c: 0 }, e: { r: 2, c: 4 } }
+      ];
+     worksheet['!merges'] = mergeCells;
+
+     var workbook = XLSX.utils.book_new();
+     XLSX.utils.book_append_sheet(workbook, worksheet, 'Receipts');
+     XLSX.writeFile(workbook, 'Masjid_Data_' + date + '.xlsx');
+    }
+  </script>
+</head>
+<body>
+  <form>
+    <table id="formTable">
+      <tr>
+        <th colspan="5">MASJID-E-KHASIMIAH</th>
+      </tr>
+      <tr>
+        <th colspan="5">23, Church Road, Murugesh Palya, Bangalore-560017</th>
+      </tr>
+      <tr>
+        <th colspan="5">CHANDA COLLECTION RECEIPT-WISE TRACKING</th>
+      </tr>
+      <tr>
+        <th>Book Number</th>
+        <th>Receipt No.</th>
+        <th>Date</th>
+        <th>Amount</th>
+        <th>Comments</th>
+      </tr>
+      <!-- Generate 100 rows for Receipt No., Date, Amount, and Comments -->
+      <!-- Each row will have a unique name (receiptNo1, date1, amount1, comments1, ..., receiptNo100, date100, amount100, comments100) -->
+      <!-- The calculateSum() function will calculate the sum of the Amount fields -->
+      <!-- The sum will be displayed in the "totalSum" field -->
+      <script>
+        for (var i = 1; i <= 100; i++) {
+          document.write('<tr>');
+          document.write(`<td><input type="number" name="bookNumber" min="1" max="100" value="1"></td>`);
+          document.write(`<td><input type="number" name="receiptNo" min="1" max="100" value="${i}"></td>`);
+          document.write(`<td><input type="date" name="date" value="${new Date().toISOString().split('T')[0]}"></td>`);
+          document.write(`<td><input type="number" name="amount" min="1" max="100" id="amount${i}" oninput="calculateSum()" required></td>`);
+          document.write(`<td><input type="text" name="comments" id="comments${i}"></td>`);
+          document.write('</tr>');
+        }
+      </script>
+      <tr>
+        <th colspan="2"></th>
+        <th>Total Sum:</th>
+        <td><input type="number" id="totalSum" name="totalSum" readonly></td>
+      </tr>
+    </table><br>
+    <div>
+      <button type="button" class="exportButton" onclick="exportData()">Export Excel</button>
+    </div>
+  </form>
+</body>
+</html>
